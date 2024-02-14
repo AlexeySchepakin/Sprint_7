@@ -11,7 +11,7 @@ public class OrderListTest {
 
     @Before
     public void setUp() {
-        RestAssured.baseURI = "http://qa-scooter.praktikum-services.ru/api/v1";
+        RestAssured.baseURI = Configuration.BASE_URI;
     }
     @Test
     @DisplayName("testGetOrderList")

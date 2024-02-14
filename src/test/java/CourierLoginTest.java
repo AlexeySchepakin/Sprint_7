@@ -1,45 +1,41 @@
 import io.qameta.allure.junit4.DisplayName;
-import io.restassured.RestAssured;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 
 public class CourierLoginTest {
-
-    private static int courierId;
+    private static CourierClient courierClient;
+    private Integer courierId;
 
     @BeforeClass
-    public static void setup() {
-        RestAssured.baseURI = "https://qa-scooter.praktikum-services.ru";
-        String body = "{\"login\": \"loginTestCourier\", \"password\": \"12345\", \"firstName\": \"LoginTest\"}";
-        given().contentType("application/json").body(body).post("/api/v1/courier");
-        courierId = given()
-                .contentType("application/json")
-                .body("{\"login\": \"loginTestCourier\", \"password\": \"12345\"}")
-                .post("/api/v1/courier/login")
-                .then()
-                .extract()
-                .path("id");
+    public static void setupClass() {
+        courierClient = new CourierClient();
     }
 
-    @AfterClass
-    public static void tearDown() {
-        given().pathParam("id", courierId).delete("/api/v1/courier/{id}");
+    @After
+    public void tearDown() {
+        if (courierId != null) {
+            courierClient.deleteCourier(courierId);
+            courierId = null;
+        }
+    }
+
+    private void createAndLoginCourier(String login, String password) {
+        String body = String.format("{\"login\": \"%s\", \"password\": \"%s\", \"firstName\": \"LoginTest\"}", login, password);
+        courierClient.createCourier(body).then().statusCode(201);
+        courierId = courierClient.loginCourier(body).then().extract().path("id");
     }
 
     @Test
-    @DisplayName("courierShouldBeAbleToLoginTest")
-    public void courierShouldBeAbleToLoginTest() {
-        given()
-                .contentType("application/json")
-                .body("{\"login\": \"loginTestCourier\", \"password\": \"12345\"}")
-                .when()
-                .post("/api/v1/courier/login")
+    @DisplayName("courierShouldBeAbleToLoginWithCorrectCredentials")
+    public void courierShouldBeAbleToLoginWithCorrectCredentials() {
+        String login = "loginTestCourier" + System.currentTimeMillis();
+        String password = "12345";
+        createAndLoginCourier(login, password); // Создаем и логиним курьера
+
+        courierClient.loginCourier(String.format("{\"login\": \"%s\", \"password\": \"%s\"}", login, password))
                 .then()
                 .statusCode(200)
                 .body("id", notNullValue());
@@ -49,11 +45,7 @@ public class CourierLoginTest {
     @Test
     @DisplayName("loginShouldRequireAllMandatoryFieldsLoginTest")
     public void loginShouldRequireAllMandatoryFieldsLoginTest() {
-        given()
-                .contentType("application/json")
-                .body("{\"login\": \"loginTestCourier\"}")
-                .when()
-                .post("/api/v1/courier/login")
+        courierClient.loginCourier("{\"login\": \"\"}")
                 .then()
                 .statusCode(400)
                 .body("message", equalTo("Недостаточно данных для входа"));
@@ -62,11 +54,7 @@ public class CourierLoginTest {
     @Test
     @DisplayName("loginShouldRequireAllMandatoryFieldsPasswordTest")
     public void loginShouldRequireAllMandatoryFieldsPasswordTest() {
-        given()
-                .contentType("application/json")
-                .body("{\"password\": \"12345\"}")
-                .when()
-                .post("/api/v1/courier/login")
+        courierClient.loginCourier("{\"password\": \"\"}")
                 .then()
                 .statusCode(400)
                 .body("message", equalTo("Недостаточно данных для входа"));
@@ -75,11 +63,10 @@ public class CourierLoginTest {
     @Test
     @DisplayName("shouldReturnErrorForIncorrectLoginOrPasswordTest")
     public void shouldReturnErrorForIncorrectLoginOrPasswordTest() {
-        given()
-                .contentType("application/json")
-                .body("{\"login\": \"loginTestCourier\", \"password\": \"wrong\"}")
-                .when()
-                .post("/api/v1/courier/login")
+        String login = "loginTestCourier" + System.currentTimeMillis();
+        createAndLoginCourier(login, "12345");
+
+        courierClient.loginCourier(String.format("{\"login\": \"%s\", \"password\": \"wrong\"}", login))
                 .then()
                 .statusCode(404)
                 .body("message", equalTo("Учетная запись не найдена"));
@@ -88,11 +75,7 @@ public class CourierLoginTest {
     @Test
     @DisplayName("shouldReturnErrorForNonExistingUserTest")
     public void shouldReturnErrorForNonExistingUserTest() {
-        given()
-                .contentType("application/json")
-                .body("{\"login\": \"nonExisting\", \"password\": \"12345\"}")
-                .when()
-                .post("/api/v1/courier/login")
+        courierClient.loginCourier("{\"login\": \"nonExisting\", \"password\": \"12345\"}")
                 .then()
                 .statusCode(404)
                 .body("message", equalTo("Учетная запись не найдена"));

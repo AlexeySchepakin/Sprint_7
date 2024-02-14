@@ -1,19 +1,16 @@
 import io.qameta.allure.junit4.DisplayName;
-import io.restassured.RestAssured;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-
 import java.util.Arrays;
 import java.util.Collection;
-
-import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.notNullValue;
 
 @RunWith(Parameterized.class)
 public class OrderCreateTest {
 
+    private static OrdersClient ordersClient;
     private final String[] color;
 
     public OrderCreateTest(String[] color) {
@@ -22,7 +19,7 @@ public class OrderCreateTest {
 
     @BeforeClass
     public static void setUp() {
-        RestAssured.baseURI = "http://qa-scooter.praktikum-services.ru/api/v1";
+        ordersClient = new OrdersClient();
     }
 
     @Parameterized.Parameters
@@ -37,13 +34,9 @@ public class OrderCreateTest {
     }
 
     @Test
-    @DisplayName("testCreateOrderWithVariousColorCombinations")
+    @DisplayName("Create order with various color combinations")
     public void testCreateOrderWithVariousColorCombinations() {
-        given()
-                .contentType("application/json")
-                .body(buildOrderRequestBody(color))
-                .when()
-                .post("/orders")
+        ordersClient.createOrder(buildOrderRequestBody(color))
                 .then()
                 .assertThat()
                 .statusCode(201)
