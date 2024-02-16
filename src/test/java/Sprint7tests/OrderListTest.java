@@ -1,3 +1,6 @@
+package Sprint7tests;
+
+import Sprint7.*;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
 import org.junit.Before;

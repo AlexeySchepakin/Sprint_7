@@ -1,16 +1,15 @@
-import io.qameta.allure.junit4.DisplayName;
-import org.junit.BeforeClass;
-import org.junit.After;
-import org.junit.Ignore;
-import org.junit.Test;
-import static org.hamcrest.Matchers.*;
+package Sprint7tests;
 
+import Sprint7.*;
+import io.qameta.allure.junit4.DisplayName;
+import org.junit.*;
+import static org.hamcrest.Matchers.*;
 public class CourierLoginTest {
     private static CourierClient courierClient;
     private Integer courierId;
 
-    @BeforeClass
-    public static void setupClass() {
+    @Before
+    public void setUp() {
         courierClient = new CourierClient();
     }
 

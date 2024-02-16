@@ -1,7 +1,8 @@
+package Sprint7;
+
 import io.qameta.allure.Step;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
-import static io.restassured.RestAssured.given;
 
 public class CourierClient {
     public CourierClient() {
@@ -10,7 +11,7 @@ public class CourierClient {
     }
     @Step("Create")
     public Response createCourier(Object body) {
-        return given()
+        return RestAssured.given()
                 .baseUri(Configuration.BASE_URI)
                 .basePath(Configuration.BASE_PATH)
                 .header("Content-type", "application/json")
@@ -21,7 +22,7 @@ public class CourierClient {
 
     @Step("Auth")
     public Response loginCourier(Object body) {
-        return given()
+        return RestAssured.given()
                 .baseUri(Configuration.BASE_URI)
                 .basePath(Configuration.BASE_PATH)
                 .header("Content-type", "application/json")
@@ -32,7 +33,7 @@ public class CourierClient {
 
     @Step("Delete")
     public Response deleteCourier(int courierId) {
-        return given()
+        return RestAssured.given()
                 .baseUri(Configuration.BASE_URI)
                 .basePath(Configuration.BASE_PATH)
                 .pathParam("id", courierId)

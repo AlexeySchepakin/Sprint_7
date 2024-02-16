@@ -1,3 +1,6 @@
+package Sprint7tests;
+
+import Sprint7.*;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
 import org.junit.After;
@@ -55,8 +58,6 @@ public class CourierCreateTest {
     public void shouldNotCreateCourierWithDuplicateLoginTest() {
         String duplicateLogin = "{\"login\": \"duplicateCourier\", \"password\": \"1234\", \"firstName\": \"Duplicate\"}";
         courierClient.createCourier(duplicateLogin);
-
-        // Получаем ID первого курьера для последующего удаления
         Response loginResponse = courierClient.loginCourier("{\"login\": \"duplicateCourier\", \"password\": \"1234\"}");
         int id = loginResponse.jsonPath().getInt("id");
         createdCouriersIds.add(id);

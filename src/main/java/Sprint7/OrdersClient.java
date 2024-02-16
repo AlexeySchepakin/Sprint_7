@@ -1,6 +1,8 @@
+package Sprint7;
+
 import io.qameta.allure.Step;
+import io.restassured.RestAssured;
 import io.restassured.response.Response;
-import static io.restassured.RestAssured.given;
 
 public class OrdersClient {
     public OrdersClient() {
@@ -8,7 +10,7 @@ public class OrdersClient {
 
     @Step("Create order")
     public Response createOrder(Object body) {
-        return given()
+        return RestAssured.given()
                 .baseUri(Configuration.BASE_URI)
                 .basePath(Configuration.BASE_PATH)
                 .header("Content-type", "application/json")
